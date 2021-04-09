@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SELECT BD</title>
+
+    <style>
+        body{
+            background-color: red;
+            }
+    </style>
+
+</head>
+<body>
+    <h1>Введите время начала и конца необходимого Вам временного периода</h1>
+    <p>Форма Ввода должна иметь вид :yyyy-mm-dd hh:mm:ss <br>
+        Например: 2021-03-25 12:08:23 </p>
+
+    <form class="form-horizontal" method="POST" action="">
+        {{ form.csrf_token() }}
+        <div>
+            {{ form.start_time.label }}
+            {{ form.start_time() }}
+            {% for error in form.start_time.errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.end_time.label }}
+            {{ form.end_time() }}
+            {% for error in form.end_time.errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.submit()}}
+            {% for error in form.submit.errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+
+</body>
+</html>
