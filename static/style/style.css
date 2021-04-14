@@ -1,0 +1,10 @@
+body{
+    background-image: url('../img/arduino_wall.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: white;
+}
+
+.select{
+    padding-top: 50px;
+}

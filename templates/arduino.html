@@ -1,31 +1,29 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+{% extends 'base.html' %}
+
+{% block title %}
     <title>Arduino Data</title>
-    <style>
-        td{
-            border: 3px solid black;
-            }
-        body{
-            background-color: red;
-            }
-    </style>
-</head>
+{% endblock %}
+
+
+{% block content %}
 <body>
+
     <table>
         <tr>
-            <th>ID</th> <th>DS18B20(t°C)</th> <th>DHT11(h%)</th> <th>DHT11(t°C)': 27.3</th>  <th>illumination</th>  <th>Время замера</th>
+            <th>up_date</th>
+            {% for col in column %}
+                <th>{{col}}</th>
+            {% endfor %}
         </tr>
-        {% for data in data%}
-        <tr>
-           <td>{{ data.id }}</td> <td>{{data.DS18B20_t}}</td> <td>{{data.DHT11_h}}</td> <td>{{data.DHT11_t}}</td> <td>{{data.illumination}}</td> <td>{{data.up_date}}</td>
-        </tr>
+        {% for dat in data %}
+            <tr>
+                <td>{{dat.up_date}}</td>
+                    {% for col in dat %}
+                        <tr>{{dat.{{col}}}}</tr>
+                    {% endfor %}
+            </tr>
         {% endfor %}
     </table>
 
 </body>
-</html>
+{% endblock %}

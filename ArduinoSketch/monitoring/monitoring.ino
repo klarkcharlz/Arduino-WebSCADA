@@ -24,7 +24,7 @@ void loop() {
 
     command = Serial.read();
 
-    delay(100); // без задержки pycharm  не успевает среагировать
+    delay(10);
 
     if (command == 'r') {  // проверяем команду на чтение
     
