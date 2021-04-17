@@ -1,9 +1,11 @@
-from flask_wtf import FlaskForm
-from wtforms import DateTimeField, SubmitField
-from wtforms.validators import DataRequired
+"""Фласк формы"""
+from flask_wtf import FlaskForm  # класс формы
+from wtforms import DateTimeField, SubmitField  # типы полей
+from wtforms.validators import DataRequired  # валидация
 
 
 class TimeSelectForm(FlaskForm):
+    """Форма для получения временного промежутка"""
     start_time = DateTimeField(label='Начало',
                                validators=[DataRequired(message="Введите дату начала в соответствии с формой.")],
                                format='%Y-%m-%d %H:%M:%S')

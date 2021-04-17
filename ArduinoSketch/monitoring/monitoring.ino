@@ -29,18 +29,18 @@ void loop() {
     if (command == 'r') {  // проверяем команду на чтение
     
       ds.requestTemperatures(); //Измеряем температуру
-      Serial.print("Dallas-DS18B20(t°C): ");
+      Serial.print("Dallas-DS18B20(t°C) ");
       Serial.println(ds.getTempCByIndex(0));
 
       float h = dht.readHumidity(); //Измеряем влажность
       float t = dht.readTemperature(); //Измеряем температуру
-      Serial.print("DHT11(h%): ");
+      Serial.print("DHT11(h%) ");
       Serial.println(h);
-      Serial.print("DHT11(t°C): ");
+      Serial.print("DHT11(t°C) ");
       Serial.println(t);
 
       val = analogRead(analogPin); // измеряем освещенность
-      Serial.print("illumination: ");
+      Serial.print("illumination ");
       Serial.println(val);
 
       //Serial.println("END"); // конец передачи

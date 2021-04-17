@@ -31,18 +31,24 @@
                     {% endfor %}
                 </div>
                 <div>
-                    {{ form.submit()}}
+                    {{ form.submit(class="btn btn-primary")}}
                     {% for error in form.submit.errors %}
                         {{ error }}
                     {% endfor %}
                 </div>
 
+
+
+                <h2>Выберите необходимые Вам показания:</h2>
                 <div>
-                    <h2>Выберите необходимые Вам показания:</h2>
-                    {% for key in data %}
-                        <input type="checkbox" name="{{key}}" value="1">{{key}}<Br>
-                    {% endfor %}
+                {% for key in data %}
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="{{key}}" value="1">
+                        <label class="form-check-label" for="flexSwitchCheckDefault">{{key}}</label>
+                    </div>
+                {% endfor %}
                 </div>
+
             </form>
         </div>
 

@@ -4,65 +4,52 @@ from datetime import datetime
 
 from models import Monitoring
 from web_form import TimeSelectForm
+import config
+from web_tools import *
 
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'LongAndRandomSecretKey'
-
-
-@app.route('/Arduino/')
-def main():
-    data = Monitoring.select()
-    return render_template('arduino.html', data=data)
+app = Flask(__name__)  # обьект нашего сервера
+app.config['SECRET_KEY'] = config.SECRET_KEY
 
 
 @app.route('/', methods=('GET', 'POST'))
 def select():
-    form = TimeSelectForm()
+    form = TimeSelectForm()  # экземпляр нашей формы
 
     if request.method == 'POST' and form.validate_on_submit():  # Если метод запроса - POST и если поля формы валидны
+        # вытаскиваем временные переменные
         start = (request.form.get('start_time'))
         end = (request.form.get('end_time'))
-        print(f"{start} - {end}")
-
+        print(f"Начало: {start} - Конец: {end}")  # check
+        # доп.проверка на логичность
         if datetime.strptime(start, '%Y-%m-%d %H:%M:%S') > datetime.now() or \
                 datetime.strptime(end, '%Y-%m-%d %H:%M:%S') < datetime.strptime(start, '%Y-%m-%d %H:%M:%S'):
             return f"Некорректно задан диапазон"
-
+        # вытаскиваем данные из бд за необходимый временной промежуток
         select_data = Monitoring.select().where(Monitoring.up_date >= start).where(Monitoring.up_date <= end)
-        if not select_data:
+        if not select_data:  # если пусто
             return "Извините но за данный временной промежуток отсутствуют данные"
-
-        column = []
-        data = []
-        DS18B20_t = (request.form.get('DS18B20_t'))
-        if DS18B20_t:
-            column.append('DS18B20_t')
-        DHT11_h = (request.form.get('DHT11_h'))
-        if DHT11_h:
-            column.append('DHT11_h')
-        DHT11_t = (request.form.get('DHT11_t'))
-        if DHT11_t:
-            column.append('DHT11_t')
-        illumination = (request.form.get('illumination'))
-        if illumination:
-            column.append('illumination')
-
+        # подготавливаем данные к отправки в шаблонизатор
+        column = []  # столбцы
+        data = []  # данные для заполнения столбцов
+        # смотрим какие данные нас интересуют и фиксируем это
+        for sensor in config.ACTUAL_SENSOR:
+            get_sensor = request.form.get(sensor)
+            if get_sensor:
+                column.append(sensor)
+        print(f'Need sensor data: {column}')  # check
+        # подготовка необходимых данных
         for row in select_data:
-            temp = {}
+            temp = [row.__dict__['__data__']['up_date']]
             for col in column:
-                temp[col] = row.__dict__['__data__'][col]
-                temp['up_date'] = row.__dict__['__data__']['up_date']
+                temp.append(row.__dict__['__data__'][col])
             data.append(temp)
-
-        # print(column)
-        # print(DS18B20_t, DHT11_h, DHT11_t, illumination)
-
+        # всё в порядке, данные подготовлены, отображаем таблицу
         return render_template('arduino.html', data=data, column=column)
 
-    data = list(Monitoring.select()[0].__dict__['__data__'].keys())[1:-1]
-    # print(data)
-    return render_template('select.html', form=form, data=data)
+    data = list(Monitoring.select()[0].__dict__['__data__'].keys())[1:-1]  # имена столбцов из бд, для checkbox'сов
+    print(f'Your sensor: {data}')  # check
+    return render_template('select.html', form=form, data=data)  # страница для получение данных от пользователя
 
 
 @app.after_request
@@ -76,4 +63,4 @@ def add_header(r):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run()  # запуск сервера

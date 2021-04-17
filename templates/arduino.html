@@ -8,7 +8,7 @@
 {% block content %}
 <body>
 
-    <table>
+    <table class="table_dark">
         <tr>
             <th>up_date</th>
             {% for col in column %}
@@ -17,10 +17,9 @@
         </tr>
         {% for dat in data %}
             <tr>
-                <td>{{dat.up_date}}</td>
-                    {% for col in dat %}
-                        <tr>{{dat.{{col}}}}</tr>
-                    {% endfor %}
+                {% for da in dat %}
+                <td>{{da}}</td>
+                {% endfor %}
             </tr>
         {% endfor %}
     </table>
