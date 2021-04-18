@@ -62,5 +62,10 @@ def add_header(r):
     return r
 
 
+@app.route('/test/',)
+def test():
+    return render_template('test/test.html')
+
+
 if __name__ == "__main__":
     app.run()  # запуск сервера
