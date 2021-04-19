@@ -1,9 +1,11 @@
-from datetime import datetime
+"""наши представления"""
+from datetime import datetime  # для проверок
 from flask import render_template, request
 
-from models import Monitoring
-from web_form import TimeSelectForm
-import config
+from models import Monitoring  # Наши модели
+from web_form import TimeSelectForm  # наши формы
+from config import ACTUAL_SENSOR  # нужные конфиги
+# from func import
 
 
 def select():
@@ -26,7 +28,7 @@ def select():
         column = []  # столбцы
         data = []  # данные для заполнения столбцов
         # смотрим какие данные нас интересуют и фиксируем это
-        for sensor in config.ACTUAL_SENSOR:
+        for sensor in ACTUAL_SENSOR:
             get_sensor = request.form.get(sensor)
             if get_sensor:
                 column.append(sensor)

@@ -1,3 +1,4 @@
+"""наши конфиги"""
 import configparser
 
 
@@ -12,7 +13,7 @@ TOTAL_SENSOR = len(ACTUAL_SENSOR)
 SECRET_KEY = config['Server']['SECRET_KEY']   # для csrf_token токена
 
 # Database
-DATABASE_NAME = config['Database']['NAME']
+DATABASE_NAME = config['Database']['NAME']  # имя базы данныъ
 
 if __name__ == "__main__":
     print(ACTUAL_SENSOR)

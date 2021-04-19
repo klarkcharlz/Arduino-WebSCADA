@@ -1,12 +1,11 @@
 import serial  # для работы с портом
 from asyncio import sleep, get_event_loop, gather  # асинхронность
 import time  # для задержки
-from loguru import logger
-
 
 # наши модули
 import models
 import config
+from logging_config import logger
 
 
 async def arduino_data_read():
@@ -43,7 +42,6 @@ async def work_with_async():
 
 
 if __name__ == "__main__":
-    logger.add('./log/database.log', format='{time} {level} {message}', level='DEBUG')
     try:
         ser = serial.Serial('/dev/ttyACM0', baudrate=9600, timeout=1)  # создаем соединение
         time.sleep(3)  # немного подождем

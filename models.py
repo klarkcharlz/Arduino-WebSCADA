@@ -3,10 +3,10 @@ from peewee import SqliteDatabase, Model, DateTimeField, FloatField, datetime  #
 from datetime import datetime  # для поля up_date
 
 
-import config
+from config import DATABASE_NAME  # необходимые конфиги
 
 
-db = SqliteDatabase(config.DATABASE_NAME)  # подключение к бд
+db = SqliteDatabase(DATABASE_NAME)  # подключение к бд
 
 
 class Monitoring(Model):
