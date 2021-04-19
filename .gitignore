@@ -2,3 +2,4 @@ arduino_monitoring.db
 try.py
 venv
 templates/test/
+log

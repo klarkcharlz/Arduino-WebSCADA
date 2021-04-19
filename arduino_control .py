@@ -1,7 +1,7 @@
 import serial  # для работы с портом
 from asyncio import sleep, get_event_loop, gather  # асинхронность
 import time  # для задержки
-from datetime import datetime  # для поля up_date
+from loguru import logger
 
 
 # наши модули
@@ -19,16 +19,15 @@ async def arduino_data_read():
             serial_data = serial_data.split()
             data[serial_data[0]] = serial_data[1]
 
-        print(f'receive data: {data}')  # проверка принятых данных
+        logger.info(f'receive data: {data}')  # проверка принятых данных
 
         data_for_insert_db = {}
         for sensor in config.ACTUAL_SENSOR:  # вытаскиваем из данных необходимые значения
             data_for_insert_db[sensor] = data.get(sensor, None)  # что то могло не прийти или прийти с  ошибкой
-        data_for_insert_db['up_date'] = datetime.now()
 
         monitoring = models.Monitoring(**data_for_insert_db)
         monitoring.save()  # производим запись в бд
-        print('data written to database')
+        logger.info('data written to database')
 
         # очищаем данные
         data_for_insert_db.clear()
@@ -44,14 +43,14 @@ async def work_with_async():
 
 
 if __name__ == "__main__":
+    logger.add('./log/database.log', format='{time} {level} {message}', level='DEBUG')
     try:
         ser = serial.Serial('/dev/ttyACM0', baudrate=9600, timeout=1)  # создаем соединение
         time.sleep(3)  # немного подождем
         loop = get_event_loop()  # создаем цикл обработчик асинхронных задач и запускаем его
         loop.run_until_complete(work_with_async())
     except Exception as err:  # пока отлавливаем и смотрим какие могут быть ошибки в течении работы скрипта
-        print(type(err))
-        print(err)
+        logger.error(f'{type(err)} : {err}')
     finally:
         ser.close()  # в случае чего закрываем соединение
 

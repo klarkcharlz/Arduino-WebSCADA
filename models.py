@@ -1,8 +1,12 @@
 """Наши модели"""
-from peewee import SqliteDatabase, Model, DateTimeField, FloatField  # всё что нужно
+from peewee import SqliteDatabase, Model, DateTimeField, FloatField, datetime  # всё что нужно
+from datetime import datetime  # для поля up_date
 
 
-db = SqliteDatabase('arduino_monitoring.db')  # подключение к бд
+import config
+
+
+db = SqliteDatabase(config.DATABASE_NAME)  # подключение к бд
 
 
 class Monitoring(Model):
@@ -11,7 +15,7 @@ class Monitoring(Model):
     DHT11_h = FloatField(null=True)
     DHT11_t = FloatField(null=True)
     illumination = FloatField(null=True)
-    up_date = DateTimeField()
+    up_date = DateTimeField(default=datetime.now())
 
     class Meta:
         database = db
