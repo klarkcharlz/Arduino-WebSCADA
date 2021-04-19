@@ -25,6 +25,9 @@ Arduino:
 3.tk_gui.py:
 Здесь создается графический интерфейс для запуска приложения написанный на tkinter.
 
+4.arduino_app.py
+Запуск и управление arduino_func.py и tk_gui.py.
+
 
 Web-server:
 
