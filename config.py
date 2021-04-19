@@ -8,6 +8,7 @@ config.read('config.ini')
 # Arduino
 ACTUAL_SENSOR = config['Arduino']['ACTUAL_SENSOR'].split(", ")  # актуальные датчики с которых пишим показания
 TOTAL_SENSOR = len(ACTUAL_SENSOR)
+SPEEDS = list(map(int, config['Arduino']['SPEEDS'].split(", ")))
 
 # Server
 SECRET_KEY = config['Server']['SECRET_KEY']   # для csrf_token токена
@@ -20,5 +21,6 @@ if __name__ == "__main__":
     print(TOTAL_SENSOR)
     print(SECRET_KEY)
     print(DATABASE_NAME)
+    print(SPEEDS)
 
 

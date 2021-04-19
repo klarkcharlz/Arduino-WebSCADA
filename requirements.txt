@@ -4,3 +4,4 @@ loguru==0.5.3
 peewee==3.14.4
 pyserial==3.5
 WTForms~=2.3.3
+Pillow~=8.2.0
