@@ -1,4 +1,4 @@
 """Настройка логгирования"""
 from loguru import logger
 
-logger.add('./log/database.log', format='{time} {level} {message}', level='DEBUG')
+logger.add('./log/arduinoWebScada.log', format='{time} {level} {message}', level='DEBUG')

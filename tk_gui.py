@@ -2,12 +2,20 @@ import tkinter as TK  # всё необходимое для создания г
 from tkinter import messagebox  # messagebox.showinfo('TEXT')
 from PIL import Image, ImageTk
 from _tkinter import TclError
-from asyncio import sleep, get_event_loop, gather  # для асинхронного выполнения задач
+from asyncio import sleep, gather  # для асинхронного выполнения задач
+import serial  # для работы с портом
+import time  # для задержки
 
 
-from config import SPEEDS
-from arduino_func import serial_ports
+# наши модули
+from config import SPEEDS  # скорости обмена данными
+from arduino_func import serial_ports, find_arduino  # дополнительные функции
+from arduino_control import arduino_data_read  # функция чтения и записи данных
+from logging_config import logger  # логирование
 
+
+ser = None  # будущий коннект
+flag = False  # флаг запущенного соединения
 
 # создадим графический интерфейс
 root_window = TK.Tk()  # главное окно
@@ -27,14 +35,19 @@ ports = TK.StringVar(root_window)  # порты
 speed = TK.StringVar(root_window)  # скорости
 logging_info = TK.StringVar(root_window)  # информирование о последних записях
 speed.set(SPEEDS[3])  # по умалчиванию 9600
+try:
+    ports.set(find_arduino())  # пытаемся установить порт по умалчиванию с автоопределением подключенного Arduino
+    logger.info(f"Arduino обнаружен на порту: {ports.get()}")
+except Exception as err:
+    logger.info(f'Не удалось обнаружить Arduino. {type(err)}: {err}.')
 
 # лейблы
 ports_label = TK.Label(text='Выберите порт:', width=20,
                        font=("Arial Bold", 24), bg="CadetBlue1", fg="gray1")  # порты
 speed_label = TK.Label(text='Выберите скорость:', width=20,
                        font=("Arial Bold", 24), bg="CadetBlue1", fg="gray1")  # скорости
-info_label = TK.Label(width=50, height=7, font=("Arial Bold", 24), textvariable=logging_info,
-                      bg="CadetBlue1", fg="gray1")  # информирование о последних записях
+log_label = TK.Label(width=150, height=20, font=("Arial Bold", 12),
+                     bg="CadetBlue1", fg="gray1", textvariable=logging_info)  # актуальный лог
 
 # выпадающие списки
 ports_list = TK.OptionMenu(root_window, ports, *serial_ports())  # порты
@@ -54,28 +67,40 @@ speed_label.pack()
 speed_list.pack()
 start_button.pack()
 stop_button.pack()
-info_label.pack()
+log_label.pack()
 
 
 # функции для кнопок
 def start():
     """начинаем опрашивать arduino и писать данные в бд"""
-    select_ports = ports.get()
+    select_ports = ports.get()  # получаем данные для соединения
     select_speed = speed.get()
-    if select_ports and select_speed:
-        print(select_ports, select_speed)
-        start_button['state'] = 'disabled'
+    if select_ports and select_speed:  # если всё необходимое есть стартуем соединение
+        start_button['state'] = 'disabled'  # делаем кнопку старт неактивной
         stop_button['state'] = 'normal'
-    else:
+        global ser
+        ser = serial.Serial(select_ports, baudrate=select_speed, timeout=1)  # создаем соединение
+        logger.info(f'Старт соединения. Порт: {select_ports}. Скорость: {select_speed}')  # фиксируем подключение
+        gather(arduino_data_read())  # начинаем работу
+        time.sleep(3)  # немного подождем
+        global flag  # флаг активного соединения
+        flag = True
+    else:  # если данных нет
         pass
 
 
 def stop():
-    """останавливаем программу"""
-    stop_button['state'] = 'disabled'
+    """останавливаем соединение"""
+    stop_button['state'] = 'disabled'  # делаем кнопку стоп неактивной
     start_button['state'] = 'normal'
+    ser.close()  # стоп соединения
+    global flag
+    flag = False  # флаг активного соединения
+    logger.info(f'Закрываем соединение')  # фиксируем отключение
+    time.sleep(3)  # немного подождем
 
 
+# назначаем функции на кнопки
 start_button['command'] = start
 stop_button['command'] = stop
 
@@ -84,20 +109,16 @@ stop_button['command'] = stop
 async def gui():
     while True:
         try:
+            # обновляем интерфейс
             root_window.update_idletasks()
             root_window.update()
+            with open("./log/arduinoWebScada.log", 'r') as f:
+                text = f.readlines()
+                logging_info.set("".join(text[-18:]))
         except TclError:
             raise KeyboardInterrupt
         else:
             await sleep(0.01)
 
 
-async def work_with_async():  # наши асинхронные задачи
-    await gather(gui())  # передаем очередь на выполнение
-
-
-if __name__ == "__main__":
-    stop_button['state'] = 'disabled'
-    loop = get_event_loop()  # цикл отслеживающий асинхронные задачи
-    loop.run_until_complete(work_with_async())  # где отслеживаем
-
+stop_button['state'] = 'disabled'  # первоначально кнопка неактивна

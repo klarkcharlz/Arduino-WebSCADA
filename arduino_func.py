@@ -1,5 +1,6 @@
 """Вспомогательные функции для работы с ардуино"""
-import serial
+import serial  # для работы с портом
+import serial.tools.list_ports  # список портов
 import sys
 import glob
 
@@ -14,7 +15,6 @@ def serial_ports():
         ports = glob.glob('/dev/tty.*')
     else:
         raise EnvironmentError('Unsupported platform')
-
     result = []
     for port in ports:
         try:
@@ -26,5 +26,20 @@ def serial_ports():
     return result
 
 
+def find_arduino():
+    """Автоопределение Arduino"""
+    ports = serial.tools.list_ports.comports()
+    commPort = 'None'
+    numConnection = len(ports)
+    for i in range(0, numConnection):
+        port = ports[i]
+        strPort = str(port.manufacturer)
+        if 'Arduino' in strPort:
+            commPort = port
+            break
+    return str(commPort).split(" - ")[0]
+
+
 if __name__ == "__main__":
     print(serial_ports())
+    print(find_arduino())
