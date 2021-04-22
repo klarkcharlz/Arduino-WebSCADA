@@ -37,8 +37,8 @@ def select_db(start, end):
     return Monitoring.select().where(Monitoring.up_date >= start).where(Monitoring.up_date <= end)
 
 
-def data_preparation(request, select_data):
-    """Подготовка данных для визуализации"""
+def data_preparation_for_table(request, select_data):
+    """Подготовка данных для визуализации в виде таблицы"""
     column = []  # столбцы
     data = []  # данные для заполнения столбцов
     # смотрим какие данные нас интересуют и фиксируем это

@@ -30,6 +30,13 @@
                         {{ error }}
                     {% endfor %}
                 </div>
+                <h2>Выберите в каком виде Вы хотите получить данные:</h2>
+                <div>
+                    {{ form.vizual_type()}}
+                    {% for error in form.submit.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
                 <div>
                     {{ form.submit(class="btn btn-primary")}}
                     {% for error in form.submit.errors %}
