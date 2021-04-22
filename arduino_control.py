@@ -6,15 +6,16 @@ from datetime import datetime  # для замеров скорости чтен
 from models import Monitoring  # наши модели
 from config import TOTAL_SENSOR, ACTUAL_SENSOR  # необходимые конфиги
 from logging_config import logger  # логирование
+import tk_gui  # ser, flag
 
 
 async def arduino_data_read():
     """Считывание данных от Arduino и их запись в бд"""
-    from tk_gui import ser  # получаем обьект соединения
-    while True:
+    ser = tk_gui.ser
+    while True:  # проверяем соединение
         # в бесконечном цикле раз в 3 секунды опрашиваем датчики
-        from tk_gui import flag  # проверяем флаг активности соединения
-        if not flag:  # если по нажатии кнопки стоп соединение было разорвано прекращаем опрос
+        # проверяем флаг активности соединения
+        if not tk_gui.flag:  # если по нажатии кнопки стоп соединение было разорвано прекращаем опрос
             ser.close()
             break
 
