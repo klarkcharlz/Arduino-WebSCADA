@@ -1,3 +1,4 @@
+"""Главное приложение"""
 from asyncio import get_event_loop, gather  # для асинхронного выполнения задач
 
 

@@ -1,3 +1,4 @@
+"""Получение, отправка данных и запись в бд"""
 from asyncio import sleep  # асинхронность
 from datetime import datetime  # для замеров скорости чтения
 

@@ -1,10 +1,11 @@
 import tkinter as TK  # всё необходимое для создания графического интерфейса
 from tkinter import messagebox  # messagebox.showinfo('TEXT')
 from PIL import Image, ImageTk
-from _tkinter import TclError
+from _tkinter import TclError  # обновление при закрытии окна
 from asyncio import sleep, gather  # для асинхронного выполнения задач
 import serial  # для работы с портом
 import time  # для задержки
+import webbrowser  # для открытия сервера в браузере
 
 
 # наши модули
@@ -12,15 +13,60 @@ from config import SPEEDS  # скорости обмена данными
 from arduino_func import serial_ports, find_arduino  # дополнительные функции
 from arduino_control import arduino_data_read  # функция чтения и записи данных
 from logging_config import logger  # логирование
+import run_server  # для управления сервером
 
 
 ser = None  # будущий коннект
 flag = False  # флаг запущенного соединения
+log_active = False  # статус окна логов
 
 # создадим графический интерфейс
 root_window = TK.Tk()  # главное окно
 root_window.title('Arduino Client')  # заголовок окна
-root_window.geometry("1080x720+600+200")  # задаем размеры окна + задаем смещение появление окна относительно экрана
+root_window.geometry("1080x720+200+100")  # задаем размеры окна + задаем смещение появление окна относительно экрана
+
+# переменные
+ports = TK.StringVar(root_window)  # порты
+speed = TK.StringVar(root_window)  # скорости
+speed.set(SPEEDS[3])  # по умалчиванию 9600
+
+
+# меню
+def logs():
+    """Актуальные логи"""
+    def on_closing():
+        """обработчик закрытия окна логов"""
+        global log_active
+        log_active = False  # фиксируем закрытие окна логов
+        log_window.destroy()
+
+    global log_active
+    log_active = True  # фиксируем открытие окна логов
+    log_window = TK.Tk()  # главное окно
+    log_window.protocol("WM_DELETE_WINDOW", on_closing)  # обработка закрытия окна логов
+    log_window.title('Arduino Client log')  # заголовок окна
+    log_window.geometry("1000x600+200+100")  # задаем размеры окна + задаем смещение появление окна относительно экрана
+    logging_info = TK.StringVar(log_window)  # Переменная для информирование о последних записях
+    log_label = TK.Label(log_window, width=150, font=("Arial Bold", 12),
+                         bg="CadetBlue1", fg="gray1", textvariable=logging_info)  # актуальный лог
+    log_label.pack()
+
+    async def update_log():
+        """Обновление логов"""
+        while True:
+            if not log_active:  # проверяем открыто ли окно, если нет прекращаем выполнение функции
+                break
+            with open("./log/arduinoWebScada.log", 'r') as f:
+                # читаем актуальные логи
+                text = f.readlines()
+                logging_info.set("".join(text[-30:]))
+            await sleep(0.5)
+    gather(update_log())
+
+
+main_menu = TK.Menu()
+root_window.config(menu=main_menu)
+main_menu.add_command(label='Логи', command=logs)
 
 # фон
 img = Image.open("./static/img/deckope.png")  # Открываем картинку
@@ -30,24 +76,21 @@ background_img = ImageTk.PhotoImage(img)  # Создаём PhotoImage
 background_label = TK.Label(root_window, image=background_img)
 background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-# переменные
-ports = TK.StringVar(root_window)  # порты
-speed = TK.StringVar(root_window)  # скорости
-logging_info = TK.StringVar(root_window)  # информирование о последних записях
-speed.set(SPEEDS[3])  # по умалчиванию 9600
 try:
-    ports.set(find_arduino())  # пытаемся установить порт по умалчиванию с автоопределением подключенного Arduino
-    logger.info(f"Arduino обнаружен на порту: {ports.get()}")
+    # пытаемся установить порт по умалчиванию с автоопределением подключенного Arduino
+    default_port = find_arduino()
+    if default_port != "None":
+        ports.set(default_port)
+        logger.info(f"Arduino обнаружен на порту: {ports.get()}")
 except Exception as err:
     logger.info(f'Не удалось обнаружить Arduino. {type(err)}: {err}.')
 
 # лейблы
-ports_label = TK.Label(text='Выберите порт:', width=20,
+ports_label = TK.Label(root_window, text='Выберите порт:', width=20,
                        font=("Arial Bold", 24), bg="CadetBlue1", fg="gray1")  # порты
-speed_label = TK.Label(text='Выберите скорость:', width=20,
+speed_label = TK.Label(root_window, text='Выберите скорость:', width=20,
                        font=("Arial Bold", 24), bg="CadetBlue1", fg="gray1")  # скорости
-log_label = TK.Label(width=150, height=20, font=("Arial Bold", 12),
-                     bg="CadetBlue1", fg="gray1", textvariable=logging_info)  # актуальный лог
+
 
 # выпадающие списки
 ports_list = TK.OptionMenu(root_window, ports, *serial_ports())  # порты
@@ -57,17 +100,24 @@ speed_list.config(width=21, font=("Arial Bold", 20), bg="CadetBlue1", fg="gray1"
 
 
 # кнопки
-start_button = TK.Button(root_window, text='Старт', width=20, height=3, bg="CadetBlue1", fg="gray1")  # старт
-stop_button = TK.Button(root_window, text='Стоп', width=20, height=3, bg="CadetBlue1", fg="gray1")  # стоп
+start_button = TK.Button(root_window, text='Старт', width=20, height=3, bg="CadetBlue1", fg="gray1")
+stop_button = TK.Button(root_window, text='Стоп', width=20, height=3, bg="CadetBlue1", fg="gray1")
+server_start = TK.Button(root_window, text='Запустить сервер', width=20, height=3, bg="CadetBlue1", fg="gray1")
+server_stop = TK.Button(root_window, text='Остановить сервер', width=20, height=3, bg="CadetBlue1", fg="gray1")
+open_server = TK.Button(root_window, text='Открыть', width=20, height=3, bg="CadetBlue1", fg="gray1")
 
 # распологаем виджеты
-ports_label.pack()
-ports_list.pack()
-speed_label.pack()
-speed_list.pack()
-start_button.pack()
-stop_button.pack()
-log_label.pack()
+ports_label.place(relx=0.33, rely=0.0)
+ports_list.place(relx=0.33, rely=0.06)
+speed_label.place(relx=0.33, rely=0.12)
+speed_list.place(relx=0.33, rely=0.18)
+
+start_button.place(relx=0.33, rely=0.25)
+stop_button.place(relx=0.53, rely=0.25)
+
+server_start.place(relx=0.33, rely=0.45)
+server_stop.place(relx=0.53, rely=0.45)
+open_server.place(relx=0.43, rely=0.55)
 
 
 # функции для кнопок
@@ -100,25 +150,53 @@ def stop():
     time.sleep(3)  # немного подождем
 
 
+def start_server():
+    """Запуск сервера"""
+    logger.info('Запуск сервера')
+    run_server.start_server()  # запуск сервера
+    # меняем статус кнопок
+    server_stop['state'] = 'normal'
+    open_server['state'] = 'normal'
+    server_start['state'] = 'disabled'
+
+
+def stop_server():
+    """Остановка сервера"""
+    logger.info('Остановка сервера')
+    run_server.stop_server()  # остановка сервера
+    # меняем статус кнопок
+    server_stop['state'] = 'disabled'
+    open_server['state'] = 'disabled'
+    server_start['state'] = 'normal'
+
+
+def open_server_func():
+    webbrowser.get(using='opera').open_new_tab('http://127.0.0.1:5000/')
+
+
 # назначаем функции на кнопки
 start_button['command'] = start
 stop_button['command'] = stop
+server_start['command'] = start_server
+server_stop['command'] = stop_server
+open_server['command'] = open_server_func
 
 
 # Запуск приложения
 async def gui():
+    """рисуем графический интерфейс"""
     while True:
+        # обновляем интерфейс
         try:
-            # обновляем интерфейс
             root_window.update_idletasks()
             root_window.update()
-            with open("./log/arduinoWebScada.log", 'r') as f:
-                text = f.readlines()
-                logging_info.set("".join(text[-18:]))
-        except TclError:
+        except TclError:  # для завершения приложения в случае закрытия главного окна
             raise KeyboardInterrupt
         else:
             await sleep(0.01)
 
 
-stop_button['state'] = 'disabled'  # первоначально кнопка неактивна
+# первоначальные состояния кнопок
+stop_button['state'] = 'disabled'
+server_stop['state'] = 'disabled'
+open_server['state'] = 'disabled'
