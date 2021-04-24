@@ -4,7 +4,8 @@ from flask import render_template, request
 from web_form import TimeSelectForm  # наши формы
 from logging_config import logger  # наше логирование
 from server_func import (clear_cache, get_date, valid_time_period, select_db,
-                         data_preparation_for_table, get_column_name)  # доп.функции
+                         data_preparation_for_table, get_column_name,
+                         data_preparation_for_trend)  # доп.функции
 
 
 def select():
@@ -21,15 +22,15 @@ def select():
         if not select_data:  # если пусто
             logger.error(f"Данные за запрошенный период отсутствуют")
             return "Извините но за данный временной промежуток отсутствуют данные"
-        # подготавливаем данные к отправки в шаблонизатор
-        data, column = data_preparation_for_table(request, select_data)
-        # определяем вид визуализации таблица или тренд
+        # определяем вид визуализации таблица или тренд и подготавливаем данные к отправки в шаблонизатор
         if request.form.get('vizual_type') == 'table':
+            data, column = data_preparation_for_table(request, select_data)
             return render_template('arduino_table.html', data=data, column=column)
         elif request.form.get('vizual_type') == 'trend':
-            pass
+            data = data_preparation_for_trend(request, select_data)
+            return render_template('arduino_trend.html', data=data)
         else:
-            pass
+            return "OOPS!"
 
     data = get_column_name()  # имена столбцов из бд, для checkbox'сов
     return render_template('select.html', form=form, data=data)  # страница для получение данных от пользователя
@@ -48,6 +49,6 @@ def test_trend():
     """Работаем над трендом"""
     data = [1, 2, 3, 4, 5, 6, 6, 6, 5, 4, 3, 2, 1]
     from datetime import datetime
-    time = [datetime.now() for _ in range(13)]
-    time = [date.strftime('%Y/%m/%d %H:%M:%S') for date in time]
+    time = [datetime.now() for _ in range(13)]  # для оси Y
+    time = [date.strftime('%Y/%m/%d %H:%M:%S') for date in time]  # для оси X
     return render_template('test/test_date.html', time=time, data=data)

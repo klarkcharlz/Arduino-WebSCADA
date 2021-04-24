@@ -61,3 +61,8 @@ def get_column_name():
     data = list(Monitoring.select()[0].__dict__['__data__'].keys())[1:-1]  # имена столбцов из бд, для checkbox'сов
     logger.info(f'В БД находятся следующие данные: {data}(запрос для главной страницы)')
     return data
+
+
+def data_preparation_for_trend(request, select_data):
+    """Подготовка данных для визуализации в виде тренда"""
+    pass
