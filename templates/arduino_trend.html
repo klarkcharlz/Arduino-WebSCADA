@@ -6,12 +6,14 @@
 
 {% block content %}
 
-    <div id="your-id" style="height: 600px;"></div>
+    <div id="your-id" style="height: 600px;" class="trend"></div>
+
+    <div><h1>Данные за: <br> {{start}} - {{end}} период <br>0 - отсутствие показаний в БД</h1></div>
 
     <script>
-        let time_js_obj = [];
-        {% for str_date in time %}
-            time_js_obj.push("{{str_date}}");
+        let time_js_str = [];
+        {% for str_date in date %}
+            time_js_str.push("{{str_date}}");
         {% endfor %}
 
         document.addEventListener("DOMContentLoaded", function(){
@@ -96,8 +98,8 @@
             },
             point: {
                 show: true,
-                radius: 5,
-                strokeWidth: 5,
+                radius: 3,
+                strokeWidth: 3,
                 stroke: "#ffffff",
             },
             tooltip: {
@@ -112,13 +114,16 @@
 
 
 
-	        d.setLabels( time_js_obj );
-	        d.addLegend({"name": "Напряжение", "stroke": "#CDDC39", "fill": "#fff", "values": {{data}} });
+	        d.setLabels( time_js_str );
+	        {% for value in data %}
+	            d.addLegend({"name": "{{value[0]}}", "stroke": "#CDDC39", "fill": "#fff", "values": {{value[1:]}} });
+	        {% endfor %}
 	        let div = document.getElementById("your-id");
 	        d.inject(div);
 	        d.draw();
         });
     </script>
+
 
     <script src="{{ url_for('static', filename='js/liteChart.min.js') }}"></script>
 {% endblock %}

@@ -65,4 +65,28 @@ def get_column_name():
 
 def data_preparation_for_trend(request, select_data):
     """Подготовка данных для визуализации в виде тренда"""
-    pass
+    column = []
+    date = []
+    data = []  # данные для диаграмм
+    # смотрим какие данные нас интересуют и фиксируем это
+    for sensor in ACTUAL_SENSOR:
+        get_sensor = request.form.get(sensor)
+        if get_sensor:
+            column.append(sensor)
+    logger.info(f'Запрошены данные по следующим показаниям: {column}')
+    # подготовка необходимых данных
+    for row in select_data:
+        date.append(row.__dict__['__data__']['up_date'])
+
+    for col in column:
+        temp = [col]
+        for row in select_data:
+            dat = row.__dict__['__data__'][col]
+            if dat == None:
+                temp.append(0)
+            else:
+                temp.append(dat)
+        data.append(temp)
+
+    date = [date.strftime('%Y/%m/%d %H:%M:%S') for date in date]
+    return data, date

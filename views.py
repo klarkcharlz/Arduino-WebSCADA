@@ -27,8 +27,9 @@ def select():
             data, column = data_preparation_for_table(request, select_data)
             return render_template('arduino_table.html', data=data, column=column)
         elif request.form.get('vizual_type') == 'trend':
-            data = data_preparation_for_trend(request, select_data)
-            return render_template('arduino_trend.html', data=data)
+            data, date = data_preparation_for_trend(request, select_data)
+            print(data)
+            return render_template('arduino_trend.html', data=data, start=start, end=end, date=date)
         else:
             return "OOPS!"
 

@@ -9,7 +9,7 @@ import webbrowser  # для открытия сервера в браузере
 
 
 # наши модули
-from config import SPEEDS  # скорости обмена данными
+from config import SPEEDS, URL, WEBBROWSERS  # необходимые конфиги
 from arduino_func import serial_ports, find_arduino  # дополнительные функции
 from arduino_control import arduino_data_read  # функция чтения и записи данных
 from logging_config import logger  # логирование
@@ -28,7 +28,9 @@ root_window.geometry("1080x720+200+100")  # задаем размеры окна
 # переменные
 ports = TK.StringVar(root_window)  # порты
 speed = TK.StringVar(root_window)  # скорости
+browser = TK.StringVar(root_window)  # браузер
 speed.set(SPEEDS[3])  # по умалчиванию 9600
+browser.set('chrome')
 
 
 # меню
@@ -95,8 +97,11 @@ speed_label = TK.Label(root_window, text='Выберите скорость:', w
 # выпадающие списки
 ports_list = TK.OptionMenu(root_window, ports, *serial_ports())  # порты
 speed_list = TK.OptionMenu(root_window, speed, *SPEEDS)  # скорости
+browsers_list = TK.OptionMenu(root_window, browser, *WEBBROWSERS)  # браузеры
 ports_list.config(width=21, font=("Arial Bold", 20), bg="CadetBlue1", fg="gray1")
 speed_list.config(width=21, font=("Arial Bold", 20), bg="CadetBlue1", fg="gray1")
+speed_list.config(width=21, font=("Arial Bold", 20), bg="CadetBlue1", fg="gray1")
+browsers_list.config(width=15, height=1, font=("Arial Bold", 20), bg="CadetBlue1", fg="gray1")
 
 
 # кнопки
@@ -105,19 +110,21 @@ stop_button = TK.Button(root_window, text='Стоп', width=20, height=3, bg="Ca
 server_start = TK.Button(root_window, text='Запустить сервер', width=20, height=3, bg="CadetBlue1", fg="gray1")
 server_stop = TK.Button(root_window, text='Остановить сервер', width=20, height=3, bg="CadetBlue1", fg="gray1")
 open_server = TK.Button(root_window, text='Открыть', width=20, height=3, bg="CadetBlue1", fg="gray1")
+update_port = TK.Button(root_window, text='Обновить', width=10, height=1, bg="CadetBlue1", fg="gray1")
 
 # распологаем виджеты
 ports_label.place(relx=0.33, rely=0.0)
 ports_list.place(relx=0.33, rely=0.06)
 speed_label.place(relx=0.33, rely=0.12)
 speed_list.place(relx=0.33, rely=0.18)
-
 start_button.place(relx=0.33, rely=0.25)
 stop_button.place(relx=0.53, rely=0.25)
-
 server_start.place(relx=0.33, rely=0.45)
 server_stop.place(relx=0.53, rely=0.45)
 open_server.place(relx=0.43, rely=0.55)
+update_port.place(relx=0.71, rely=0.07)
+
+browsers_list.place(relx=0.38, rely=0.65)
 
 
 # функции для кнопок
@@ -171,7 +178,17 @@ def stop_server():
 
 
 def open_server_func():
-    webbrowser.get(using='opera').open_new_tab('http://127.0.0.1:5000/')
+    """Открываем веб сервер в браузере"""
+    program = browser.get()
+    webbrowser.get(using=program).open_new_tab(URL)
+
+
+def port_update():
+    ports_list.value = serial_ports()
+    default_port = find_arduino()
+    if default_port != "None":
+        ports.set(default_port)
+        logger.info(f"Arduino обнаружен на порту: {ports.get()}")
 
 
 # назначаем функции на кнопки
@@ -180,6 +197,7 @@ stop_button['command'] = stop
 server_start['command'] = start_server
 server_stop['command'] = stop_server
 open_server['command'] = open_server_func
+update_port['command'] = port_update
 
 
 # Запуск приложения
