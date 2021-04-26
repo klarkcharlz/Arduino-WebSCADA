@@ -43,6 +43,7 @@ def add_header(r):
     return clear_cache(r)
 
 
+# в разработке
 def test_calender():
     """Работаем над календарем"""
     return render_template('test/test_calender.html')
@@ -55,3 +56,25 @@ def test_trend():
     time = [datetime.now() for _ in range(13)]  # для оси Y
     time = [date.strftime('%Y/%m/%d %H:%M:%S') for date in time]  # для оси X
     return render_template('test/test_date.html', time=time, data=data)
+
+
+def test_bar():
+    """Работаем над гистограммами"""
+    import shelve
+    import pygal
+
+    FILENAME = "arduino_web_scada/utils/exchange"  # файл где хранятся данные для обмена
+
+    def shelve_read(var: str):
+        """считывание данных"""
+        with shelve.open(FILENAME) as file:
+            return file[var]
+    data = shelve_read('last_data')
+    # Визуализация результатов.
+    chart = pygal.Bar()
+    chart.title = 'Actual Sensors Values'
+    chart.x_labels = list(data.keys())
+    chart.add('', list(map(float, list(data.values()))))
+    chart.render_to_file('arduino_web_scada/web_server/static/bar/bar.svg')
+
+    return render_template('test/test_bar.html')

@@ -20,6 +20,7 @@ def add_header(r):
     return views.add_header(r)
 
 
+# в разработке
 @app.route('/test/calender')
 def test_calender():
     """Тестируем календари"""
@@ -30,4 +31,11 @@ def test_calender():
 def test_trend():
     """Тестируем тренды"""
     return views.test_trend()
+
+
+@app.route('/test/bar')
+def test_bar():
+    """Тестируем тренды"""
+    return views.test_bar()
+
 
