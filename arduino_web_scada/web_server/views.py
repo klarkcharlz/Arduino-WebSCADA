@@ -1,11 +1,13 @@
 """наши представления"""
 from flask import render_template, request
 
-from web_form import TimeSelectForm  # наши формы
-from logging_config import logger  # наше логирование
-from server_func import (clear_cache, get_date, valid_time_period, select_db,
-                         data_preparation_for_table, get_column_name,
-                         data_preparation_for_trend)  # доп.функции
+
+# наши модули
+from arduino_web_scada.web_server.web_form import TimeSelectForm  # наши формы
+from arduino_web_scada.utils.logging_config import logger  # наше логирование
+from arduino_web_scada.web_server.server_func import (clear_cache, get_date, valid_time_period, select_db,
+                                                      data_preparation_for_table, get_column_name,
+                                                      data_preparation_for_trend)  # доп.функции
 
 
 def select():

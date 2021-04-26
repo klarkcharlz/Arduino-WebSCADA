@@ -1,9 +1,9 @@
 """Наши модели"""
-from peewee import SqliteDatabase, Model, DateTimeField, FloatField, datetime  # всё что нужно
+from peewee import SqliteDatabase, Model, DateTimeField, FloatField  # всё что нужно
 from datetime import datetime  # для поля up_date
 
 
-from config import DATABASE_NAME  # необходимые конфиги
+from arduino_web_scada.utils.config import DATABASE_NAME  # необходимые конфиги
 
 
 db = SqliteDatabase(DATABASE_NAME)  # подключение к бд

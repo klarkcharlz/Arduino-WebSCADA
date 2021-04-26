@@ -3,7 +3,7 @@ import configparser
 
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('arduino_web_scada/utils/config.ini')
 
 # Arduino
 ACTUAL_SENSOR = config['Arduino']['ACTUAL_SENSOR'].split(", ")  # актуальные датчики с которых пишим показания

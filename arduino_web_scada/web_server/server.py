@@ -1,8 +1,7 @@
 from flask import Flask  # сервер
 
-
-import views  # наши представления
-from config import SECRET_KEY  # для csrf_token
+from arduino_web_scada.web_server import views
+from arduino_web_scada.utils.config import SECRET_KEY  # для csrf_token
 
 
 app = Flask(__name__)  # обьект нашего сервера

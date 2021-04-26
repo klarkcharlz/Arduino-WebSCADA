@@ -1,5 +1,4 @@
 import tkinter as TK  # всё необходимое для создания графического интерфейса
-from tkinter import messagebox  # messagebox.showinfo('TEXT')
 from PIL import Image, ImageTk
 from _tkinter import TclError  # обновление при закрытии окна
 from asyncio import sleep, gather  # для асинхронного выполнения задач
@@ -9,15 +8,15 @@ import webbrowser  # для открытия сервера в браузере
 
 
 # наши модули
-from config import SPEEDS, URL, WEBBROWSERS  # необходимые конфиги
-from arduino_func import serial_ports, find_arduino  # дополнительные функции
-from arduino_control import arduino_data_read  # функция чтения и записи данных
-from logging_config import logger  # логирование
-import run_server  # для управления сервером
+from arduino_web_scada.utils.config import SPEEDS, URL, WEBBROWSERS  # необходимые конфиги
+from arduino_web_scada.arduino.arduino_func import serial_ports, find_arduino  # дополнительные функции
+from arduino_web_scada.arduino.arduino_control import arduino_data_read  # функция чтения и записи данных
+from arduino_web_scada.utils.logging_config import logger  # логирование
+from arduino_web_scada.web_server import run_server  # запуск сервера
+from arduino_web_scada.utils.exchange_dat import shelve_write, save_ser
 
 
-ser = None  # будущий коннект
-flag = False  # флаг запущенного соединения
+ser = None  # наш сервер
 log_active = False  # статус окна логов
 
 # создадим графический интерфейс
@@ -30,7 +29,7 @@ ports = TK.StringVar(root_window)  # порты
 speed = TK.StringVar(root_window)  # скорости
 browser = TK.StringVar(root_window)  # браузер
 speed.set(SPEEDS[3])  # по умалчиванию 9600
-browser.set('chrome')
+browser.set('opera')
 
 
 # меню
@@ -58,7 +57,7 @@ def logs():
         while True:
             if not log_active:  # проверяем открыто ли окно, если нет прекращаем выполнение функции
                 break
-            with open("./log/arduinoWebScada.log", 'r') as f:
+            with open("log/arduinoWebScada.log", 'r') as f:
                 # читаем актуальные логи
                 text = f.readlines()
                 logging_info.set("".join(text[-30:]))
@@ -71,7 +70,7 @@ root_window.config(menu=main_menu)
 main_menu.add_command(label='Логи', command=logs)
 
 # фон
-img = Image.open("./static/img/deckope.png")  # Открываем картинку
+img = Image.open("arduino_web_scada/arduino/img/deckope.png")  # Открываем картинку
 img = img.resize((1080, 720))  # Изменяем размер картинки
 background_img = ImageTk.PhotoImage(img)  # Создаём PhotoImage
 # создаем фон как обьект Label и помещаем его в окно
@@ -137,11 +136,12 @@ def start():
         stop_button['state'] = 'normal'
         global ser
         ser = serial.Serial(select_ports, baudrate=select_speed, timeout=1)  # создаем соединение
+        save_ser(ser)  # сохраняем сервер
+        # сохраняем обьект сервера
         logger.info(f'Старт соединения. Порт: {select_ports}. Скорость: {select_speed}')  # фиксируем подключение
         gather(arduino_data_read())  # начинаем работу
         time.sleep(3)  # немного подождем
-        global flag  # флаг активного соединения
-        flag = True
+        shelve_write('flag', True)  # флаг активного соединения
     else:  # если данных нет
         pass
 
@@ -150,11 +150,7 @@ def stop():
     """останавливаем соединение"""
     stop_button['state'] = 'disabled'  # делаем кнопку стоп неактивной
     start_button['state'] = 'normal'
-    ser.close()  # стоп соединения
-    global flag
-    flag = False  # флаг активного соединения
-    logger.info(f'Закрываем соединение')  # фиксируем отключение
-    time.sleep(3)  # немного подождем
+    shelve_write('flag', False)  # флаг активного соединения
 
 
 def start_server():

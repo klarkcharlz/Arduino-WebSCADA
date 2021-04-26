@@ -1,9 +1,11 @@
 """Запуск сервера"""
 from multiprocessing import Process  # для управления сервером
-from server import app  # наш сервер
 
 
-server = None  # наш будущий сервер
+from arduino_web_scada.web_server.server import app  # наш сервер
+
+
+server = None  # наш будущий сервер для управления из графического приложения
 
 
 def start_server():

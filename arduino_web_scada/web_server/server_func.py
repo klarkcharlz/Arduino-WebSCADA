@@ -1,10 +1,10 @@
 """вспомогательные функции для веб-сервера"""
-from logging_config import logger  # логирование
+from arduino_web_scada.utils.logging_config import logger  # логирование
 from datetime import datetime  # для проверки даты
 
 
-from models import Monitoring  # Наши модели
-from config import ACTUAL_SENSOR  # нужные конфиги
+from arduino_web_scada.web_server.models import Monitoring  # Наши модели
+from arduino_web_scada.utils.config import ACTUAL_SENSOR  # нужные конфиги
 
 
 def clear_cache(r):
