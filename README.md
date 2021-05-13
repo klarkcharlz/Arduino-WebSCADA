@@ -1,3 +1,10 @@
+![Снимок экрана от 2021-05-13 07-37-46](https://user-images.githubusercontent.com/71945221/118078279-831ff580-b3be-11eb-84d6-546962d7ab6a.png)
+![Снимок экрана от 2021-05-13 07-38-09](https://user-images.githubusercontent.com/71945221/118078281-84512280-b3be-11eb-9791-2e3ee1fb4ebd.png)
+![Снимок экрана от 2021-05-13 07-38-13](https://user-images.githubusercontent.com/71945221/118078282-84e9b900-b3be-11eb-8f65-45331ae0698e.png)
+![Снимок экрана от 2021-05-13 07-38-51](https://user-images.githubusercontent.com/71945221/118078283-84e9b900-b3be-11eb-85ab-a87bfedaff46.png)
+![Снимок экрана от 2021-05-13 07-38-54](https://user-images.githubusercontent.com/71945221/118078285-85824f80-b3be-11eb-8087-50534208a697.png)
+![Снимок экрана от 2021-05-13 07-39-07](https://user-images.githubusercontent.com/71945221/118078286-85824f80-b3be-11eb-830c-fdadbb224430.png)
+![Снимок экрана от 2021-05-13 07-39-10](https://user-images.githubusercontent.com/71945221/118078289-861ae600-b3be-11eb-944c-b99d458cb195.png)
 # Arduino-WebSCADA
 my_home_project
 
